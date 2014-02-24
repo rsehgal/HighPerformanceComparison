@@ -4,6 +4,9 @@
 */
 #include <iostream>
 #include <blaze/Math.h>
+#include "TBBStopWatch.h"
+#include "Vector3DFast.h"
+
 using blaze::StaticVector;
 using blaze::DynamicVector;
 
@@ -23,9 +26,39 @@ b[2] = -3;
 
 // Adding the vectors a and b
 
+StopWatch tmr;
+double Tacc=0.0;
+//tmr.getOverhead(10);
+Tacc=0.0;
+tmr.Start();
 DynamicVector<int> c = a + b;
+tmr.Stop();
+Tacc=tmr.getDeltaSecs();
+
+std::cout<<"Execution Time : "<<Tacc<<std::endl;
 
 // Printing the result of the vector addition
 std::cout << "c =\n" << c << "\n";
+
+std::cout<<"==================================================================="<<std::endl;
+std::cout<<"Starting Using Vector3DFast Class"<<std::endl;
+std::cout<<"==================================================================="<<std::endl;
+
+double scalar=3;
+Vector3DFast av(4,-2,5);
+Vector3DFast bv(2,5,-3);
+Vector3DFast cv(0,0,0);
+cv=av+bv;
+std::cout << cv <<std::endl;
+
 return 0;
 }
+
+
+/*
+StopWatch tmr;
+double Tacc=0.0;
+
+tmr.getOverhead(10);
+Tacc=0.0;
+*/

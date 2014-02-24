@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 2.8)
+set(OUTDIR ${PROJECT_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MYLIBROOT}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTDIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTDIR}/bin)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /home/ramanNew/cmake/modules)
+find_package(Blaze REQUIRED)
+include_directories(${Blaze_INCLUDE_DIR})
+
+find_package(TBB)
+include_directories(${TBB_INCLUDE_DIR})
+
+find_package(Vc REQUIRED)
+include_directories(${VC_INCLUDE_DIR})
+
+include_directories(inc)
+
+file(GLOB testsources tests/*.cpp)
+
+foreach( test ${testsources} )
+        get_filename_component( TESTEXEC ${test} NAME_WE)
+        add_executable(${TESTEXEC} ${test} src/Vector3DFast.cpp)
+        target_link_libraries(${TESTEXEC} "-L ${Blaze_LIBRARY_DIR} -L ${TBB_LIBRARIES} -L ${VC_LIBRARIES} -lVc -lblaze -lrt")
+endforeach( test )
+
+
