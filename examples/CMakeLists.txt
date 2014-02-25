@@ -4,7 +4,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MYLIBROOT}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTDIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTDIR}/bin)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /home/ramanNew/cmake/modules)
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /home/ramanNew/cmake/modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/modules) 
 find_package(Blaze REQUIRED)
 include_directories(${Blaze_INCLUDE_DIR})
 
@@ -16,7 +17,10 @@ include_directories(${VC_INCLUDE_DIR})
 
 include_directories(inc)
 
-file(GLOB testsources tests/*.cpp)
+
+file(GLOB testsources tests/ex3Simple.cpp)
+#file(GLOB testsources tests/*.cpp)
+#set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-O2 -S")
 
 foreach( test ${testsources} )
         get_filename_component( TESTEXEC ${test} NAME_WE)
