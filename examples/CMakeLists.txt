@@ -18,7 +18,13 @@ include_directories(${VC_INCLUDE_DIR})
 include_directories(inc)
 
 
-file(GLOB testsources tests/ex3Simple.cpp)
+#file(GLOB testsources tests/ex1.cpp tests/ex3Simple.cpp)
+file(GLOB testsources tests/denseVectorAddition.cpp)
+#if( USEAVX )
+#set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-mavx -fabi-version=0")
+#else()
+set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-msse4.1")
+#endif( USEAVX )
 #file(GLOB testsources tests/*.cpp)
 #set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-O2 -S")
 
