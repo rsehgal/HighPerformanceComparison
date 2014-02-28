@@ -688,6 +688,9 @@ public:
 	__attribute__((always_inline))
 	MasterToLocal(Vector3DFast const & master, Vector3DFast & local) const
 	{
+		//local=master.GetX()*rotrow1 + master.GetY()*rotrow2 + master.GetZ()*rotrow3;
+
+		
 		if(tid == 0) // no translation
 		{
 			if(rid == 1296) // identity
@@ -711,6 +714,7 @@ public:
 				local = tmp.GetX()*rotrow1 + tmp.GetY()*rotrow2 + tmp.GetZ()*rotrow3;
 			}
 		}
+		
 	}
 
 	template <int rid>
@@ -773,6 +777,13 @@ public:
 		printf("%12.11f\t%12.11f\t%12.11f    Tz = %10.6f\n", rotcol1.GetZ(), rotcol2.GetZ(), rotcol3.GetZ(), trans.GetZ());
 	}
 
+	void printMatrix()
+	{
+	  std::cout<<rotrow1<<std::endl;
+	  std::cout<<rotrow2<<std::endl;
+	  std::cout<<rotrow3<<std::endl;
+	}
+
 	// the tid and rid are properties of the right hand matrix
 	template<int tid, int rid>
 	inline
@@ -795,17 +806,17 @@ public:
 			double tmpy = rotrow1.GetY();
 			double tmpz = rotrow1.GetZ();
 			rotrow1 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-
+			//std::cout<<res.rotrow1<<std::endl;
 			tmpx = rotrow2.GetX();
 			tmpy = rotrow2.GetY();
 			tmpz = rotrow2.GetZ();
 			rotrow2 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-
+			//std::cout<<res.rotrow2<<std::endl;
 			tmpx = rotrow3.GetX();
 			tmpy = rotrow3.GetY();
 			tmpz = rotrow3.GetZ();
 			rotrow3 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-
+			//std::cout<<res.rotrow3<<std::endl;
 			// update rotcols
 			// TOBE DONE BUT WE COULD ALSO JUST FORBID TO USE LOCALTOMASTER ON A GLOBAL MATRIX
 		}
