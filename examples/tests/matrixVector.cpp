@@ -33,7 +33,7 @@ Av.SetRotation(matrixArray);
 //Actual Benchmarking stuff (doing transformation of dense Vector of N dimension using transformation matrix)
 int n=10000,N=0;
 int iter=30;
-int store=0;
+int store=1;
 int scalar=0.001;
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -42,8 +42,8 @@ for(int i=1;i<=iter;i++)
 {
 N=n*i;
 double *testArray=new double[N*3];
-//double *Vector3DFastArray=new double[N*3];
-//double *BlazeArray=new double[N*3];
+double *Vector3DFastArray=new double[N*3];
+double *BlazeArray=new double[N*3];
 //double *denseBlazeArray=new double[N*3];
 for(int k=0 ; k<3*N ; k++)
 {
@@ -60,6 +60,12 @@ for(int j=0;j<N;j++)
 Vector3DFast av(testArray+(3*j));
 Vector3DFast bv;
 Av.MasterToLocal<0,1>(av,bv); //Multiplying Matrix with Vector
+if(store)
+{
+*(Vector3DFastArray+(3*j)+0)=bv.GetX();
+*(Vector3DFastArray+(3*j)+1)=bv.GetY();
+*(Vector3DFastArray+(3*j)+2)=bv.GetZ();
+}
 }
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
@@ -80,6 +86,12 @@ StaticVector<double,3UL> a(3UL, testArray+(3*j));
 //StaticVector<double,3UL> a( 0, 0, 0 );
 StaticVector<double,3UL> b( 0, 0, 0 );
 b = A * a;
+if(store)
+{
+*(BlazeArray+(3*j)+0)=b[0];
+*(BlazeArray+(3*j)+1)=b[1];
+*(BlazeArray+(3*j)+2)=b[2];
+}
 }
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
@@ -113,13 +125,14 @@ Tacc=tmr.getDeltaSecs();
 std::cout<<Tacc<<"  :::: ";//std::endl;
 std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
 
+*/
 //Validating the results.
 for(int k=0 ; k<3*N ; k++)
   {
-	if( (Vector3DFastArray[k]-denseBlazeArray[k]) || (Vector3DFastArray[k]-BlazeArray[k]) || (denseBlazeArray[k]-BlazeArray[k]) )
+	if( (Vector3DFastArray[k]-BlazeArray[k]) )
 	    std::cout<<"Value Differs"<<std::endl;
   }
-*/
+
 }
 
 std::cout<<"******* Value ********"<<std::endl;
