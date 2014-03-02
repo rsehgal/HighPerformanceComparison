@@ -6,6 +6,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTDIR}/bin)
 
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /home/ramanNew/cmake/modules)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/modules) 
+
+find_package(BLAS REQUIRED)
+include_directories(${BLAS_INCLUDE_DIR})
+
 find_package(Blaze REQUIRED)
 include_directories(${Blaze_INCLUDE_DIR})
 
@@ -15,15 +19,20 @@ include_directories(${TBB_INCLUDE_DIR})
 find_package(Vc REQUIRED)
 include_directories(${VC_INCLUDE_DIR})
 
+find_package(BOOST REQUIRED)
+include_directories(${BOOST_INCLUDE_DIR})
+
 include_directories(inc)
 
 
-#file(GLOB testsources tests/ex1.cpp tests/ex3Simple.cpp)
-file(GLOB testsources tests/denseVectorAddition.cpp tests/daxpy.cpp)
+#file(GLOB testsources tests/ex1.cpp) # tests/ex3Simple.cpp)
+#file(GLOB testsources tests/denseVectorAddition.cpp tests/daxpy.cpp)
+#file(GLOB testsources  tests/matrixSimple2.cpp tests/matrixSimple3.cpp)
+file(GLOB testsources tests/matrixVector.cpp)
 #if( USEAVX )
-set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-mavx -fabi-version=0")
+#set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-mavx -fabi-version=0")
 #else()
-#set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-msse4.1")
+set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-fpermissive -msse4.1")
 #endif( USEAVX )
 #file(GLOB testsources tests/*.cpp)
 #set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-O2 -S")
@@ -31,7 +40,7 @@ set_source_files_properties(${testsources} PROPERTIES COMPILE_FLAGS "-mavx -fabi
 foreach( test ${testsources} )
         get_filename_component( TESTEXEC ${test} NAME_WE)
         add_executable(${TESTEXEC} ${test} src/Vector3DFast.cpp)
-        target_link_libraries(${TESTEXEC} "-L ${Blaze_LIBRARY_DIR} -L ${TBB_LIBRARIES} -L ${VC_LIBRARY_DIR} -lVc -lblaze -lrt")
+        target_link_libraries(${TESTEXEC} "-I /home/raman/BOOST/boost_1_55_0/BUILD/include -L ${Blaze_LIBRARY_DIR} -L ${TBB_LIBRARIES} -L ${VC_LIBRARY_DIR} -L ${BLAS_LIBRARY_DIR} -lgoto2_atomp-r3.14 -lVc -lblaze -lrt -lpthread")
 endforeach( test )
 
 
