@@ -25,6 +25,7 @@ include_directories(${BOOST_INCLUDE_DIR})
 include_directories(inc)
 
 
+#Add list of file that needs to be compiled.
 #file(GLOB testsources tests/ex1.cpp) # tests/ex3Simple.cpp)
 #file(GLOB testsources tests/denseVectorAddition.cpp tests/daxpy.cpp)
 #file(GLOB testsources  tests/matrixSimple2.cpp tests/matrixSimple3.cpp)
