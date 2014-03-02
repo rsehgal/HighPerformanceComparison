@@ -7,7 +7,7 @@
 #include <common.h>
 #include "TBBStopWatch.h"
 #include "Vector3DFast.h"
-
+#include <fstream>
 //#define N 30000
 
 using blaze::StaticVector;
@@ -18,6 +18,10 @@ using namespace blaze;
 
 int main()
 {
+std::system("rm -rf timing.txt");
+std::ofstream outfile;
+outfile.open("timing.txt",std::ios::app);
+
 double *matrixArray=new double[9]; //Transformation Matrix array
 for(int i=0;i<9;i++)
 {
@@ -32,7 +36,7 @@ Av.SetRotation(matrixArray);
 
 //Actual Benchmarking stuff (doing transformation of dense Vector of N dimension using transformation matrix)
 int n=10000,N=0;
-int iter=30;
+int iter=15;
 int store=1;
 int scalar=0.001;
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -52,6 +56,13 @@ for(int k=0 ; k<3*N ; k++)
 
 StopWatch tmr;
 double Tacc=0.0;
+//tmr.getOverhead(100);
+//Tacc=0.0;
+//tmr.Start();
+double sum=0;
+int ent=10;
+for(int s=0 ; s<ent ; s++)
+{
 tmr.getOverhead(100);
 Tacc=0.0;
 tmr.Start();
@@ -69,12 +80,20 @@ if(store)
 }
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
+sum+=Tacc;
+}
 std::cout<<"Execution Time N="<<N*3<<"  :  "<<Tacc<< " :::: ";
-
+outfile<<N*3<<"\t"<<sum/ent<<"\t";
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Below code uses Blaze and utilizing its 3D vectors to do dense vector addition
-Tacc=0.0;
+//Tacc=0.0;
+//tmr.getOverhead(100);
+//Tacc=0.0;
+//tmr.Start();
+sum=0;
+for(int s=0 ; s<ent ; s++)
+{
 tmr.getOverhead(100);
 Tacc=0.0;
 tmr.Start();
@@ -95,10 +114,12 @@ if(store)
 }
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
+sum+=Tacc;
+}
 //std::cout<<Tacc<<std::endl;
 std::cout<<Tacc<<" :::: "<<std::endl;
 //std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
-
+outfile<<sum/ent<<std::endl;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Utilizing dense vector mechanism of Blaze itself
@@ -135,6 +156,7 @@ for(int k=0 ; k<3*N ; k++)
 
 }
 
+outfile.close();
 std::cout<<"******* Value ********"<<std::endl;
 //std::cout<<sumv<<" :::: "<<sv<<std::endl;
 //std::cout<<"----------------------"<<std::endl;
