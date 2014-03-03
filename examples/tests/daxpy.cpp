@@ -6,7 +6,7 @@
 #include <blaze/Math.h>
 #include "TBBStopWatch.h"
 #include "Vector3DFast.h"
-
+#include <fstream>
 //#define N 30000
 
 using blaze::StaticVector;
@@ -14,9 +14,13 @@ using blaze::DynamicVector;
 using namespace blaze;
 int main()
 {
+std::system("rm -rf timing.txt");
+std::ofstream outfile;
+outfile.open("timing.txt",std::ios::app);
+
 int n=10000,N=0;
-int iter=30;
-int store=0;
+int iter=10;
+int store=1,doValidation=1;
 int scalar=0.001;
 //double testArray[]={4,-2,5};
 
@@ -63,7 +67,7 @@ if(store)
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
 std::cout<<"Execution Time N="<<N*3<<"  :  "<<Tacc<< " :::: ";
-
+outfile<<N<<"\t"<<Tacc<<"\t";
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Below code uses Blaze and utilizing its 3D vectors to do dense vector addition
@@ -93,7 +97,7 @@ Tacc=tmr.getDeltaSecs();
 std::cout<<Tacc<<" :::: "; //std::endl;
 //std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
 
-
+outfile<<Tacc<<std::endl;
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Utilizing dense vector mechanism of Blaze itself
 Tacc=0.0;
@@ -119,13 +123,16 @@ std::cout<<Tacc<<"  :::: ";//std::endl;
 std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
 
 //Validating the results.
+if(doValidation)
+{
 for(int k=0 ; k<3*N ; k++)
   {
 	if( (Vector3DFastArray[k]-denseBlazeArray[k]) || (Vector3DFastArray[k]-BlazeArray[k]) || (denseBlazeArray[k]-BlazeArray[k]) )
 	    std::cout<<"Value Differs"<<std::endl;
   }
 }
-
+}
+ outfile.close();
 std::cout<<"******* Value ********"<<std::endl;
 //std::cout<<sumv<<" :::: "<<sv<<std::endl;
 //std::cout<<"----------------------"<<std::endl;

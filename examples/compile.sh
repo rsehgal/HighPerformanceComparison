@@ -1,6 +1,6 @@
 mkdir build
 cd build
-cmake ..
+cmake -DUSEAVX=ON ..
 make clean
 make
 echo "Deleting Temporary File created during compilation"
