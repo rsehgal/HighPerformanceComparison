@@ -1,0 +1,10 @@
+=======================================================
+#Type these instructions one by one on gnuplot prompt.
+=======================================================
+plot "timing.txt" using 1:3 title "Blaze" with lp,"timing.txt" using 1:2 title "Vector3DFast" with lp
+set xlabel "VectorLength"
+set ylabel "Time"
+set title "<Title for the graph>"
+set term jpeg
+set output "<imageName>.jpeg"
+replot
