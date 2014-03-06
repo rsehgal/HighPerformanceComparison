@@ -18,8 +18,8 @@ for(int i=0;i<9;i++)
 }
 DynamicMatrix<double,rowMajor> A(3,3,testArray);
 std::cout<<A<<std::endl;
-StaticVector<double,3UL> a( 2, 2, 2 );
-StaticVector<double,3UL> b( 0, 0, 0 );
+StaticVector<double,3UL,columnVector> a( 2, 2, 2 );
+StaticVector<double,3UL,columnVector> b( 0, 0, 0 );
 b = A * a;
 std::cout<<a<<std::endl;
 std::cout<<b<<std::endl;

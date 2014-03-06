@@ -7,6 +7,9 @@
 #include "TBBStopWatch.h"
 #include "Vector3DFast.h"
 #include <fstream>
+
+#include <cstdlib>
+#include <time.h>
 //#define N 30000
 
 using blaze::StaticVector;
@@ -19,7 +22,7 @@ std::ofstream outfile;
 outfile.open("timing.txt",std::ios::app);
 
 int n=10000,N=0;
-int iter=10;
+int iter=20;
 int store=1,doValidation=1;
 //double testArray[]={4,-2,5};
 
@@ -34,6 +37,12 @@ DynamicVector<double,rowVector> sv(3); //for storing sum using Blaze
 DynamicVector<double> dc;
 for(int i=1;i<=iter;i++)
 {
+//-------------------------------
+//For generating random numbers
+time_t t;
+time(&t);
+srand((double)t);
+//-------------------------------
 N=n*i;
 double *testArray=new double[N*3];
 double *Vector3DFastArray=new double[N*3];
@@ -41,7 +50,7 @@ double *BlazeArray=new double[N*3];
 double *denseBlazeArray=new double[N*3];
 for(int k=0 ; k<3*N ; k++)
 {
- testArray[k]=1.2;
+ testArray[k]=rand()%100; //Assigning random number between 0 and 100   // previous giving 1.2
 }
 
 StopWatch tmr;

@@ -9,6 +9,8 @@
 #include "Vector3DFast.h"
 #include <fstream>
 //#define N 30000
+#include <cstdlib>
+#include <time.h>
 
 using blaze::StaticVector;
 using blaze::DynamicVector;
@@ -36,7 +38,7 @@ Av.SetRotation(matrixArray);
 
 //Actual Benchmarking stuff (doing transformation of dense Vector of N dimension using transformation matrix)
 int n=10000,N=0;
-int iter=10;
+int iter=20;
 int store=1,doValidation=1;
 int scalar=0.001;
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,6 +46,10 @@ int scalar=0.001;
 
 for(int i=1;i<=iter;i++)
 {
+time_t t;
+time(&t);
+srand((double)t);
+
 N=n*i;
 double *testArray=new double[N*3];
 double *Vector3DFastArray=new double[N*3];
@@ -51,17 +57,17 @@ double *BlazeArray=new double[N*3];
 //double *denseBlazeArray=new double[N*3];
 for(int k=0 ; k<3*N ; k++)
 {
- testArray[k]=1.2;
+ //testArray[k]=1.2;
+  testArray[k]=rand()%100; //Assigning random number between 0 and 100   // previous giving 1.2
 }
 
 StopWatch tmr;
 double Tacc=0.0;
-//tmr.getOverhead(100);
-//Tacc=0.0;
-//tmr.Start();
+
 double sum=0;
 int ent=10;
 //for(int s=0 ; s<ent ; s++)
+
 {
 tmr.getOverhead(100);
 Tacc=0.0;
@@ -82,16 +88,12 @@ tmr.Stop();
 Tacc=tmr.getDeltaSecs();
 //sum+=Tacc;
 }
-std::cout<<"Execution Time N="<<N*3<<"  :  "<<Tacc<< " :::: ";
+std::cout<<"Execution Time N="<<N<<"  :  "<<Tacc<< " :::: ";
 //outfile<<N*3<<"\t"<<sum/ent<<"\t";
 outfile<<N<<"\t"<<Tacc<<"\t";
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Below code uses Blaze and utilizing its 3D vectors to do dense vector addition
-//Tacc=0.0;
-//tmr.getOverhead(100);
-//Tacc=0.0;
-//tmr.Start();
 sum=0;
 //for(int s=0 ; s<ent ; s++)
 {
@@ -123,32 +125,8 @@ std::cout<<Tacc<<" :::: "<<std::endl;
 //outfile<<sum/ent<<std::endl;
 outfile<<Tacc<<std::endl;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Utilizing dense vector mechanism of Blaze itself
-/*
-Tacc=0.0;
-tmr.getOverhead(100);
-Tacc=0.0;
-tmr.Start();
-const int sz=N*3;
 
-DynamicVector<double> da(sz, testArray);
-DynamicVector<double> db( sz, testArray );
-DynamicVector<double> dc;
-dc = db+ da*scalar;
-if(store)
-{
-for(int j=0;j<3*N;j++)
-{
-*(denseBlazeArray+j)=dc[j];
-}
-}
-tmr.Stop();
-Tacc=tmr.getDeltaSecs();
-std::cout<<Tacc<<"  :::: ";//std::endl;
-std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
 
-*/
 //Validating the results.
 if(doValidation)
 {
@@ -163,8 +141,5 @@ for(int k=0 ; k<3*N ; k++)
 
 outfile.close();
 std::cout<<"******* Value ********"<<std::endl;
-//std::cout<<sumv<<" :::: "<<sv<<std::endl;
-//std::cout<<"----------------------"<<std::endl;
-//std::cout<<dc<<std::endl;
 
 }

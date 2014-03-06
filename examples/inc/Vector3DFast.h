@@ -96,6 +96,7 @@ public:
 		}
 
 
+	//Added by Raman
 	__attribute__((always_inline))
 	Vector3DFast( double *testArray ) : internalVcmemory()
 							//, x(internalVcmemory[0]),	y(internalVcmemory[1]), z(internalVcmemory[2]) 
@@ -107,6 +108,21 @@ public:
 			//std::cerr << a/32. << std::endl;
 			//assert( a / 32. == 0 );
 			SetX(testArray[0]);SetY(testArray[1]);SetZ(testArray[2]);
+	}
+
+	//Added by Raman
+	__attribute__((always_inline))
+	void Set( double x,  double y,  double z )
+	//: internalVcmemory()
+							//, x(internalVcmemory[0]),	y(internalVcmemory[1]), z(internalVcmemory[2]) 
+	{
+	  //	void * a =  &internalVcmemory[0];
+	//	std::cerr << a << " " << ((long long) a) % 32L << std::endl;
+		//		assert( ((long long) a) % 32L == 0 );
+		//long long a = (long long) &internalVcmemory[0];
+			//std::cerr << a/32. << std::endl;
+			//assert( a / 32. == 0 );
+			SetX(x);SetY(y);SetZ(z);
 	}
 
 
@@ -154,8 +170,10 @@ public:
 	__attribute__((always_inline))
 	Vector3DFast & operator=( Vector3DFast const & rhs )
 	{
+		//std::cout<<"I M CALLED"<<std::endl;
 		for( int i=0; i < 1 + 3/Vc::Vector<double>::Size; i++ )
 		{
+
 #ifdef VECTORDEBUG
 			base_t v1 = rhs.internalVcmemory.vector(i);
 			std::cerr << "assigning " << v1 << std::endl;
@@ -228,6 +246,7 @@ public:
 	inline 
 	__attribute__((always_inline))	  
 void SetX(double x)  {
+		//std::cout<<"SET X Called"<<std::endl;
 		internalVcmemory[0]=x;}
 
 	inline 
