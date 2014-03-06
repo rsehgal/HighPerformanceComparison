@@ -48,9 +48,11 @@ double tempb_z=rand()%100;
 (b[i]).SetY(tempb_y);
 (b[i]).SetZ(tempb_z);
 
+
 (d[i]).SetX(tempb_x);
 (d[i]).SetY(tempb_y);
 (d[i]).SetZ(tempb_z);
+
 
 //Filling Blaze 3D Vectors
 StaticVector<int,3UL,rowVector> tempVect_a(tempa_x,tempa_y,tempa_z);
@@ -61,7 +63,8 @@ bl_b[i]=tempVect_b;
 bl_d[i]=tempVect_b;
 //std::cout<<a[i]<" :: ";
 //std::cout<<bl_a[i]<<std::endl;
-}
+
+} //Data filling over
 
 std::cout<<"---------------------------------------------"<<std::endl;
 std::cout<<"Data filled successfully"<<std::endl;
@@ -75,8 +78,10 @@ std::cout<<"---------------------------------------------"<<std::endl;
 //Real Stuff of Vector Processing
 for(int i=0 ; i<n ; i++) //Start Vector Processing
 {
-//uncomment below block for AVX
-/*
+#ifdef USEAVX
+//For AVX don't know why this extra stuff is required, otherwise SEGMENTATION FAULT
+//Actually this should not be required and it should work like "c[i]=a[i]+b[i]+d[i]"
+std::cout<<"------ USING AVX --------"<<std::endl;
 Vector3DFast av(0,0,0);
 av.SetX(a[i].GetX());
 av.SetY(a[i].GetY());
@@ -86,13 +91,28 @@ Vector3DFast bv(0,0,0);
 bv.SetX(b[i].GetX());
 bv.SetY(b[i].GetY());
 bv.SetZ(b[i].GetZ());
-c[i]=av+bv;
-*/
 
+Vector3DFast cv(0,0,0);
+
+Vector3DFast dv(0,0,0);
+dv.SetX(d[i].GetX());
+dv.SetY(d[i].GetY());
+dv.SetZ(d[i].GetZ());
+
+cv=av+bv+dv;
+c[i].SetX(cv.GetX());
+c[i].SetY(cv.GetY());
+c[i].SetZ(cv.GetZ());
+
+#else
 //For SSE it works as expected
+std::cout<<"------ USING SSE --------"<<std::endl;
 c[i]=a[i]+b[i]+d[i];
+#endif
 
+//BLAZE is OK in both cases
 bl_c[i]=bl_a[i]+bl_b[i]+bl_d[i];
+
 //std::cout<<a[i]<<" : "<<b[i]<<" :: "<<bl_a[i]<<" : "<<bl_b[i]<<" :::: "<<c[i]<<" : "<<bl_c[i]<<std::endl;
 //std::cout<<c[i]<<" : "<<bl_c[i]<<std::endl;
 }
