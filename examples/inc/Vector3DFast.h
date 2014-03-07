@@ -14,13 +14,23 @@
 #include <iostream>
 #include <cassert>
 #include "mm_malloc.h"
-#include <blaze/Math.h>
+//#include "GlobalDefs.h"
+
+/* Useful to construct masks with the first N-bits set */
+const bool maskinit[] = {true, true, true, true,  
+				false, false, false, false,
+				false, false, false, false,
+				false, false, false, false };
+
+static Vc::Vector<double>::Mask maskFirstTwoOn(maskinit+2);
+
 class Vector3DFast
 {
 private:
 	typedef Vc::Vector<double> base_t;
 	typedef typename base_t::Mask mask_t;
 	Vc::Memory<base_t, 3 > internalVcmemory;
+	// mask_t maskFirstTwoOn;
 
 	inline
 	__attribute__((always_inline))
@@ -36,16 +46,31 @@ public:
 	//	double & z;
 
 	// for proper memory allocation on the heap
-	static 
+	// static 
 	void * operator new(std::size_t sz)
 	{
-//	  std::cerr  << "overloaded new called" << std::endl;
+	  std::cerr  << "overloaded new called" << std::endl;
 	  void *aligned_buffer=_mm_malloc( sizeof(Vector3DFast), 32 );
 	  return ::operator new(sz, aligned_buffer);
 	}
 
-	static
+	// static
 	  void operator delete(void * ptr)
+	{
+	  // std::cerr << "overloaded delete" << std::endl;
+	  _mm_free(ptr);
+	}
+
+	static 
+	void * operator new[](std::size_t sz)
+	{
+//	  std::cerr  << "overloaded new called" << std::endl;
+	  void *aligned_buffer=_mm_malloc( sizeof(Vector3DFast)*sz, 32 );
+	  return ::operator new[](sz, aligned_buffer);
+	}
+
+	static
+	  void operator delete[](void * ptr)
 	{
 	  // std::cerr << "overloaded delete" << std::endl;
 	  _mm_free(ptr);
@@ -57,6 +82,8 @@ public:
 	Vector3DFast( ) : internalVcmemory()
 // , x(internalVcmemory[0]), 	y(internalVcmemory[1]), z(internalVcmemory[2])
 	{
+		// maskFirstTwoOn.load( maskinit+2 );
+
 		// assert alignment
 	  //	void * a =  &internalVcmemory[0];
 	//	std::cerr << a << " " << ((long long) a) % 32L << std::endl;
@@ -94,36 +121,6 @@ public:
 			//assert( a / 32. == 0 );
 			SetX(x);SetY(y);SetZ(z);
 		}
-
-
-	//Added by Raman
-	__attribute__((always_inline))
-	Vector3DFast( double *testArray ) : internalVcmemory()
-							//, x(internalVcmemory[0]),	y(internalVcmemory[1]), z(internalVcmemory[2]) 
-	{
-	  //	void * a =  &internalVcmemory[0];
-	//	std::cerr << a << " " << ((long long) a) % 32L << std::endl;
-		//		assert( ((long long) a) % 32L == 0 );
-		//long long a = (long long) &internalVcmemory[0];
-			//std::cerr << a/32. << std::endl;
-			//assert( a / 32. == 0 );
-			SetX(testArray[0]);SetY(testArray[1]);SetZ(testArray[2]);
-	}
-
-	//Added by Raman
-	__attribute__((always_inline))
-	void Set( double x,  double y,  double z )
-	//: internalVcmemory()
-							//, x(internalVcmemory[0]),	y(internalVcmemory[1]), z(internalVcmemory[2]) 
-	{
-	  //	void * a =  &internalVcmemory[0];
-	//	std::cerr << a << " " << ((long long) a) % 32L << std::endl;
-		//		assert( ((long long) a) % 32L == 0 );
-		//long long a = (long long) &internalVcmemory[0];
-			//std::cerr << a/32. << std::endl;
-			//assert( a / 32. == 0 );
-			SetX(x);SetY(y);SetZ(z);
-	}
 
 
 	inline
@@ -170,10 +167,8 @@ public:
 	__attribute__((always_inline))
 	Vector3DFast & operator=( Vector3DFast const & rhs )
 	{
-		//std::cout<<"I M CALLED"<<std::endl;
 		for( int i=0; i < 1 + 3/Vc::Vector<double>::Size; i++ )
 		{
-
 #ifdef VECTORDEBUG
 			base_t v1 = rhs.internalVcmemory.vector(i);
 			std::cerr << "assigning " << v1 << std::endl;
@@ -224,6 +219,53 @@ public:
 		return s.sum();
 	}
 
+	/*
+	inline
+	__attribute__((always_inline))
+	double ScalarProductInXYPlane( Vector3DFast const & rhs ) const
+	{
+		if( Vc::Vector<double>::Size == 1) {
+			base_t tmpx = this->internalVcmemory.vector(0);
+			base_t tmpy = this->internalVcmemory.vector(1);
+
+			base_t tmp2x = rhs.internalVcmemory.vector(0);
+			base_t tmp2y = rhs.internalVcmemory.vector(1);
+
+			return ((tmpx * tmp2x) + (tmpy * tmp2y))[0];
+		}
+		else {
+			base_t result = Vc::Zero;
+			base_t tmp1 = this->internalVcmemory.vector(0);
+			base_t tmp2 = rhs.internalVcmemory.vector(0);
+
+			tmp1 *= tmp2;
+			result(maskFirstTwoOn) = tmp1;
+			return result.sum();
+		}
+
+	}
+
+	inline
+	__attribute__((always_inline))
+	double SquaredOnXYplane() const {	
+
+		if( Vc::Vector<double>::Size == 1 ) {
+			base_t tmpx = this->internalVcmemory.vector(0);
+			base_t tmpy = this->internalVcmemory.vector(1);
+
+			return (tmpx * tmpx + tmpy * tmpy)[0];
+		}
+		else {
+			base_t result = Vc::Zero;
+			base_t tmp = this->internalVcmemory.vector(0);
+			tmp = tmp*tmp;
+			result(maskFirstTwoOn) = tmp;
+			return result.sum();
+		}
+
+	}
+	*/
+
 	__attribute__((always_inline))
 	inline double GetX() const {
 		return internalVcmemory[ 0 ];
@@ -245,8 +287,15 @@ public:
 
 	inline 
 	__attribute__((always_inline))	  
+	void Set(double x, double y, double z)  {
+		internalVcmemory[0]=x;
+		internalVcmemory[1]=y;
+		internalVcmemory[2]=z;
+	}
+
+	inline 
+	__attribute__((always_inline))	  
 void SetX(double x)  {
-		//std::cout<<"SET X Called"<<std::endl;
 		internalVcmemory[0]=x;}
 
 	inline 
@@ -419,6 +468,67 @@ void SetZ(double z)  {
 		return false;
 	}
 
+
+	inline
+	static
+	__attribute__((always_inline))
+	// this should be templated and made more general ( for instance generalizing on condition )
+	int CountIndicesWhereBothComponentsPositive( Vector3DFast const & v1, Vector3DFast const & v2, int & mask )
+	{
+		// returns true of there exists an index i such that v1(i)>0 and v2(i)>0
+		// used for instance in box distancetoin
+		int count=0;
+		for(int i=0; i < 1 + 3/Vc::Vector<double>::Size; i++)
+		{
+			base_t v1c = v1.internalVcmemory.vector(i);
+			base_t v2c = v2.internalVcmemory.vector(i);
+			mask_t m = v1c>0 && v2c>0;
+			count+=m.count();
+			mask=m.toInt();
+			int b = mask>>1;
+			//	std::cerr << " Analysing this mask: countofones " << m.count() << " first One " << m.firstOne() << " maskint " << mask << " " << m << " " << b << std::endl;
+		}
+		return count;
+	}
+
+
+	/*
+	inline
+	__attribute__((always_inline))
+	int GetIndexOfPositiveMinimum( ) const
+	{
+		double d = Utils::kInfinity;
+		int index=-1;
+		bool condition = internalVcmemory[0] >=0 && internalVcmemory[0]< d;
+		index = ( condition )? 0 : index;
+		d = ( condition )? internalVcmemory[0] : d;
+		condition = internalVcmemory[1] >=0 && internalVcmemory[1] < d;
+		index = ( condition )? 1 : index;
+		d = ( condition )? internalVcmemory[2] : d;
+		condition = internalVcmemory[2] >=0 && internalVcmemory[2] < d;
+		index = ( condition )? 2 : index;
+		return index;
+	}
+	*/
+
+	inline
+	static
+	__attribute__((always_inline))
+	// this should be templated and made more general ( for instance generalizing on condition )
+	bool AllOfLeftSmallerThanRight( Vector3DFast const & lhs, Vector3DFast const & rhs )
+	{
+		// returns true of there exists an index i such that v1(i)>0 and v2(i)>0
+		// used for instance in box distancetoin
+		for( int i=0; i < 1 + 3/Vc::Vector<double>::Size; i++ )
+		{
+			base_t v1c = lhs.internalVcmemory.vector(i);
+			base_t v2c = rhs.internalVcmemory.vector(i);
+			mask_t m = v1c <= v2c;
+			if(  m.isFull( ) ) return true;
+		}
+		return false;
+	}
+
 	inline
 	void
 	print() const
@@ -440,11 +550,39 @@ void SetZ(double z)  {
 		Vector3DFast tmp;
 		for( int i=0; i < 1 + 3/Vc::Vector<double>::Size; i++ )
 		{
-			mask_t m = this->internalVcmemory.vector(i) < 0;
-			result |= ! m.isEmpty();
+		  base_t v =  this->internalVcmemory.vector(i);
+		  mask_t m = v < Vc::Zero;
+		  result |= ! m.isEmpty();
 		}
 		return result;
 	}
+
+
+	inline
+	__attribute__((always_inline))
+	// a starting comparison operator
+	int IndexOfMax( ) const
+	{
+		int index=0;
+		double d=internalVcmemory[0];
+		index = ( internalVcmemory[1] > d ) ? 1 : index;
+		d = ( internalVcmemory[1] > d ) ? internalVcmemory[1] : d;
+		index = ( internalVcmemory[2] > d ) ? 2 : index;
+		return index;
+	}
+
+
+	inline
+	__attribute__((always_inline))
+	// a starting comparison operator
+	double HMax( ) const
+	{
+		double d=internalVcmemory[0];
+		d = ( internalVcmemory[1] > d ) ? internalVcmemory[1] : d;
+		d = ( internalVcmemory[2] > d ) ? internalVcmemory[2] : d;
+		return d;
+	}
+
 
 	inline
 	__attribute__((always_inline))
@@ -577,7 +715,7 @@ extern Vector3DFast gZeroVector3DFast;
 extern Vector3DFast gXVector3DFast;
 extern Vector3DFast gYVector3DFast;
 extern Vector3DFast gZVector3DFast;
-
+extern Vector3DFast gEpsilonVector3DFast;
 
 // to try something with Vc memory
 // note: this is a class which should work optimally with vector instructions sets >= AVX
@@ -707,9 +845,6 @@ public:
 	__attribute__((always_inline))
 	MasterToLocal(Vector3DFast const & master, Vector3DFast & local) const
 	{
-		//local=master.GetX()*rotrow1 + master.GetY()*rotrow2 + master.GetZ()*rotrow3;
-
-		
 		if(tid == 0) // no translation
 		{
 			if(rid == 1296) // identity
@@ -733,7 +868,6 @@ public:
 				local = tmp.GetX()*rotrow1 + tmp.GetY()*rotrow2 + tmp.GetZ()*rotrow3;
 			}
 		}
-		
 	}
 
 	template <int rid>
@@ -758,10 +892,7 @@ public:
 
 	void setAngles(double phi, double theta, double psi)
 	{
-//ADDED BY RAMAN
-//const
-// double M_PI = 3.14159;//26535897932384626433832795029;
-		double degrad = blaze::M_PI/180.;
+		double degrad = M_PI/180.;
 		double sinphi = sin(degrad*phi);
 		double cosphi = cos(degrad*phi);
 		double sinthe = sin(degrad*theta);
@@ -796,13 +927,6 @@ public:
 		printf("%12.11f\t%12.11f\t%12.11f    Tz = %10.6f\n", rotcol1.GetZ(), rotcol2.GetZ(), rotcol3.GetZ(), trans.GetZ());
 	}
 
-	void printMatrix()
-	{
-	  std::cout<<rotrow1<<std::endl;
-	  std::cout<<rotrow2<<std::endl;
-	  std::cout<<rotrow3<<std::endl;
-	}
-
 	// the tid and rid are properties of the right hand matrix
 	template<int tid, int rid>
 	inline
@@ -825,17 +949,17 @@ public:
 			double tmpy = rotrow1.GetY();
 			double tmpz = rotrow1.GetZ();
 			rotrow1 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-			//std::cout<<res.rotrow1<<std::endl;
+
 			tmpx = rotrow2.GetX();
 			tmpy = rotrow2.GetY();
 			tmpz = rotrow2.GetZ();
 			rotrow2 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-			//std::cout<<res.rotrow2<<std::endl;
+
 			tmpx = rotrow3.GetX();
 			tmpy = rotrow3.GetY();
 			tmpz = rotrow3.GetZ();
 			rotrow3 = tmpx*rhs->rotrow1 + tmpy*rhs->rotrow2 + tmpz*rhs->rotrow3;
-			//std::cout<<res.rotrow3<<std::endl;
+
 			// update rotcols
 			// TOBE DONE BUT WE COULD ALSO JUST FORBID TO USE LOCALTOMASTER ON A GLOBAL MATRIX
 		}
