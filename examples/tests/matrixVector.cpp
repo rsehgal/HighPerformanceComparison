@@ -140,6 +140,6 @@ for(int k=0 ; k<3*N ; k++)
 }
 
 outfile.close();
-std::cout<<"******* Value ********"<<std::endl;
+std::cout<<"******* Finished ********"<<std::endl;
 
 }

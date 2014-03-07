@@ -49,25 +49,17 @@ double tempb_x=rand()%100;
 double tempb_y=rand()%100;
 double tempb_z=rand()%100;
 
-//Filling Vector3DFast 3D Vectors
-//(a[i]).SetX(tempa_x);
-//(a[i]).SetY(tempa_y);
-//(a[i]).SetZ(tempa_z);
+
 a[i].Set(tempa_x,tempa_y,tempa_z);
 
-//(b[i]).SetX(tempb_x);
-//(b[i]).SetY(tempb_y);
-//(b[i]).SetZ(tempb_z);
 b[i].Set(tempb_x,tempb_y,tempb_z);
-
-//(d[i]).SetX(tempb_x);
-//(d[i]).SetY(tempb_y);
-//(d[i]).SetZ(tempb_z);
+//b[i].Set(tempa_x,tempa_y,tempa_z);
 
 
 //Filling Blaze 3D Vectors
 StaticVector<int,3UL,rowVector> tempVect_a(tempa_x,tempa_y,tempa_z);
 StaticVector<int,3UL,rowVector> tempVect_b(tempb_x,tempb_y,tempb_z);
+//StaticVector<int,3UL,rowVector> tempVect_b(tempa_x,tempa_y,tempa_z);
 
 bl_a[i]=tempVect_a;
 bl_b[i]=tempVect_b;
@@ -89,26 +81,7 @@ std::cout<<"---------------------------------------------"<<std::endl;
 //Adding Stopwatch
 StopWatch tmr;
 double Tacc=0.0;
-//=============
-/*
-tmr.getOverhead(100);
-Tacc=0.0;
-tmr.Start();
-for(int i=0 ; i<n ; i++) //Start Vector Processing for Blaze
-{
-//BLAZE is OK in both cases
-bl_c[i]=bl_a[i]+bl_b[i];//+bl_d[i];
 
-//std::cout<<a[i]<<" : "<<b[i]<<" :: "<<bl_a[i]<<" : "<<bl_b[i]<<" :::: "<<c[i]<<" : "<<bl_c[i]<<std::endl;
-//std::cout<<c[i]<<" : "<<bl_c[i]<<std::endl;
-}
-
-tmr.Stop();
-Tacc=tmr.getDeltaSecs();
-std::cout<<Tacc<<" :::: ";//<<std::endl;
-outfile<<Tacc<<" :::: ";//std::endl;
-*/
-//=============
 //double Tacc=0.0;
 Tacc=0.0;
 tmr.getOverhead(100);
@@ -124,29 +97,15 @@ for(int i=0 ; i<n ; i++) //Start Vector Processing
 //std::cout<<"------ USING AVX --------"<<std::endl;
 Vector3DFast av(0,0,0);
 av.Set(a[i].GetX(),a[i].GetY(),a[i].GetZ());
-//av.SetX(a[i].GetX());
-//av.SetY(a[i].GetY());
-//av.SetZ(a[i].GetZ());
+
 
 Vector3DFast bv(0,0,0);
 bv.Set(b[i].GetX(),b[i].GetY(),b[i].GetZ());
-//bv.SetX(b[i].GetX());
-//bv.SetY(b[i].GetY());
-//bv.SetZ(b[i].GetZ());
 
 Vector3DFast cv(0,0,0);
-/*
-Vector3DFast dv(0,0,0);
-dv.SetX(d[i].GetX());
-dv.SetY(d[i].GetY());
-dv.SetZ(d[i].GetZ());
-*/
+
 cv=av+bv;//+dv;
 c[i].Set(cv.GetX(),cv.GetY(),cv.GetZ());
-//c[i].SetX(cv.GetX());
-//c[i].SetY(cv.GetY());
-//c[i].SetZ(cv.GetZ());
-
 
 #else
 //For SSE it works as expected
@@ -186,14 +145,13 @@ for(int i=0 ; i<n ; i++) //Do Validation
   {
     if((bl_c[i][0]-c[i].GetX()) || (bl_c[i][1]-c[i].GetY()) || (bl_c[i][2]-c[i].GetZ()))
       std::cout<<"Result Differs : Validation Fails"<<std::endl;
-    else
-      std::cout<<"Result Matches : Validation Successfull"<<std::endl;
+    //else
+    //  std::cout<<"Result Matches : Validation Successfull"<<std::endl;
   }
 }
 delete a;delete b;delete d;delete c;
 delete bl_a;delete bl_b;delete bl_d;delete bl_c;
-//delete[]a;delete[]b;delete[]d;delete[]d;
-//delete[]bl_a;delete[]bl_b;delete[]bl_d;delete[]bl_c;
+
 }// iter loop ends
 outfile.close();
 } //main ends here

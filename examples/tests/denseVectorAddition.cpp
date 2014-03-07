@@ -24,17 +24,9 @@ outfile.open("timing.txt",std::ios::app);
 int n=10000,N=0;
 int iter=20;
 int store=1,doValidation=1;
-//double testArray[]={4,-2,5};
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Using Vector3DFast Library
-Vector3DFast fv;
-std::cout << fv <<std::endl;
-//Vector3DFast bv,cv,av,sumv;
-Vector3DFast sumv; //for storing sum using Vector3DFast
-DynamicVector<double,rowVector> sv(3); //for storing sum using Blaze
-//StaticVector<double,3UL,rowVector> sv;
-DynamicVector<double> dc;
+
 for(int i=1;i<=iter;i++)
 {
 //-------------------------------
@@ -47,10 +39,12 @@ N=n*i;
 double *testArray=new double[N*3];
 double *Vector3DFastArray=new double[N*3];
 double *BlazeArray=new double[N*3];
-double *denseBlazeArray=new double[N*3];
+
 for(int k=0 ; k<3*N ; k++)
 {
  testArray[k]=rand()%100; //Assigning random number between 0 and 100   // previous giving 1.2
+ Vector3DFastArray[k]=0.0;
+ BlazeArray[k]=0.0;
 }
 
 StopWatch tmr;
@@ -60,11 +54,12 @@ Tacc=0.0;
 tmr.Start();
 for(int j=0;j<N;j++)
 {
+//For testing purpose filling same array in both av and bv
 Vector3DFast av(testArray+(3*j));
 Vector3DFast bv(testArray+(3*j));
 Vector3DFast cv;
 cv=av+bv;
-if(store)
+if(store)  //requires for data Validation
 {
 *(Vector3DFastArray+(3*j)+0)=cv.GetX();
 *(Vector3DFastArray+(3*j)+1)=cv.GetY();
@@ -87,12 +82,14 @@ for(int j=0;j<N;j++)
 {
 //DynamicVector<double> a( 3 ), b( 3 ), c( 3 );
 StaticVector<double,3UL,rowVector> a(3UL, testArray+(3*j));
+
 //StaticVector<double,3UL> b( 2, 5, -3 );
 StaticVector<double,3UL,rowVector> b( 3UL, testArray+(3*j) );
+
 StaticVector<double,3UL,rowVector> c;
 c=a+b;
 //sv+=c;
-if(store)
+if(store)  //requires for data Validation
 {
 *(BlazeArray+(3*j)+0)=c[0];
 *(BlazeArray+(3*j)+1)=c[1];
@@ -101,53 +98,20 @@ if(store)
 }
 tmr.Stop();
 Tacc=tmr.getDeltaSecs();
-//std::cout<<Tacc<<std::endl;
-std::cout<<Tacc<<" :::: "; //std::endl;
-//std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
+std::cout<<Tacc<<" :::: "<<std::endl;
 outfile<<Tacc<<std::endl;
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Utilizing dense vector mechanism of Blaze itself
-Tacc=0.0;
-tmr.getOverhead(100);
-Tacc=0.0;
-tmr.Start();
-const int sz=N*3;
-//StaticVector<double,sz> da(sz, testArray);
-////StaticVector<double,3UL> db( 2, 5, -3 );
-//StaticVector<double,sz> db( sz, testArray );
-//StaticVector<double,sz> dc;
-
-DynamicVector<double> da(sz, testArray);
-//StaticVector<double,3UL> db( 2, 5, -3 );
-DynamicVector<double> db( sz, testArray );
-//DynamicVector<double> dc;
-dc=da+db;
-if(store)
-{
-for(int j=0;j<3*N;j++)
-{
-*(denseBlazeArray+j)=dc[j];
-}
-}
-tmr.Stop();
-Tacc=tmr.getDeltaSecs();
-std::cout<<Tacc<<"  :::: ";//std::endl;
-std::cout<<sumv<<"  ::  "<<sv;//<<std::endl;
 
 //Validating the results.
 if(doValidation)
 for(int k=0 ; k<3*N ; k++)
   {
-	if( (Vector3DFastArray[k]-denseBlazeArray[k]) || (Vector3DFastArray[k]-BlazeArray[k]) || (denseBlazeArray[k]-BlazeArray[k]) )
+	if( (Vector3DFastArray[k]-BlazeArray[k]) )
 	    std::cout<<"Value Differs"<<std::endl;
   }
 }
 
 outfile.close();
-std::cout<<"******* Value ********"<<std::endl;
-//std::cout<<sumv<<" :::: "<<sv<<std::endl;
-//std::cout<<"----------------------"<<std::endl;
-//std::cout<<dc<<std::endl;
+std::cout<<"******* Finished ********"<<std::endl;
+
 
 }
