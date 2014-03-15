@@ -1,0 +1,21 @@
+Tests directory contains 4 benchMark Program
+denseVectorAddition.cpp : BenchMarking the addition of Vector. In this program the data is store in array of double.
+heapTestVectorAddition.cpp : This will also BenchMark the addition of Vector. But the data is store in a heap created by overloaded new of Vector3DFast
+			     heap of blaze
+
+matrixVector.cpp : BenchMarking the (Matrix X Vector) operation. The data is again in double array
+heapTestMatrixVector.cpp : This will also do BenchMarking of (Matrix X Vector) operation. But the data is store in a heap created by overloaded new ofi     				 Vector3DFast heap of blaze
+
+daxpy.cpp : BenchMarking the (c = b + a*scalar) operation. The data is again in double array
+heapTestDaxpy.cpp : This will also do BenchMarking of (c = b + a*scalar) operation. But the data is store in a heap created by overloaded new of                                   Vector3DFast heap of blaze
+
+Results of the timing of all the program will be stored in corresponding text files named
+timingVectorAddition.txt
+timingHeapVectorAddition.txt
+timingMatrixVector.txt
+timingHeapMatrixVector.txt
+timingDaxpy.txt
+timingHeapDaxpy.txt
+
+Format of all the text files
+No.OfVector	timing-Vector3DFast 	timing-Blaze
